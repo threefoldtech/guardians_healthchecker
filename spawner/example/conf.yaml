@@ -1,10 +1,10 @@
 farms:
   - 1
-  - 2
 deployment_strategy: "100" #options: "70%", "50%", etc
 grid_endpoints:
-  - graphql: ""
-  - proxy: ""
-  - relay: ""
-mnemonic: example-mnemonic # mnemonic of the user
+  graphql: "https://graphql.test.grid.tf/graphql"
+  proxy: "https://gridproxy.test.grid.tf/"
+  relay: "wss://relay.dev.grid.tf"
+  subsrate_url: "wss://tfchain.dev.grid.tf/ws"
+mnemonic: "lonely spoon west coral tool pulse garbage garlic sick lumber slight animal" # mnemonic of the user
 failure_strategy: "retry"  # Other options: "stop", "destroy-all", "destroy-failing"

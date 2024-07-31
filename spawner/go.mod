@@ -6,14 +6,14 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/rs/zerolog v1.33.0
 	github.com/threefoldtech/tfgrid-sdk-go/grid-client v0.15.11
-	sigs.k8s.io/yaml v1.4.0
+	github.com/threefoldtech/zos v0.5.6-0.20240611092312-66184cdeb953
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/threefoldtech/zos v0.5.6-0.20240611092312-66184cdeb953 // indirect
 )
 
 require (

@@ -5,7 +5,7 @@ import (
 	"io"
 
 	spawner "github.com/threefoldtech/guardians_healthchecker/spawner/pkg/deployer"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 func ParseConfig(file io.Reader) (spawner.Config, error) {

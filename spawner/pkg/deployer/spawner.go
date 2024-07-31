@@ -115,7 +115,6 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			Entrypoint:  "/sbin/zinit init",
 			NetworkName: net.Name,
 		}
-
 		d := workloads.NewDeployment(
 			fmt.Sprintf("deployment_%d", node.NodeID),
 			uint32(node.NodeID),
@@ -127,7 +126,6 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			[]workloads.VM{vm},
 			nil,
 		)
-
 		networks = append(networks, &net)
 		vms = append(vms, &d)
 	}
