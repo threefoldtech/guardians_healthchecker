@@ -1,0 +1,10 @@
+farms:
+  - 1
+  - 2
+deployment_strategy: "100" #options: "70%", "50%", etc
+grid_endpoints:
+  - graphql: ""
+  - proxy: ""
+  - relay: ""
+mnemonic: example-mnemonic # mnemonic of the user
+failure_strategy: "retry"  # Other options: "stop", "destroy-all", "destroy-failing"
