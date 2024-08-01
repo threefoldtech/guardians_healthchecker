@@ -76,20 +76,6 @@ func getNodes(ctx context.Context, tfPluginClient deployer.TFPluginClient, farm 
 	return nodes, nil
 }
 
-func calculateVMCount(nodes []types.Node, strategy string) int {
-	totalNodes := len(nodes)
-	switch strategy {
-	case "100%":
-		return totalNodes
-	case "70%":
-		return int(float64(totalNodes) * 0.7)
-	case "50%":
-		return int(float64(totalNodes) * 0.5)
-	default:
-		return totalNodes
-	}
-}
-
 func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Config, nodes []types.Node, vmCount int) error {
 	var networks []*workloads.ZNet
 	var vms []*workloads.Deployment
@@ -108,7 +94,7 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 		}
 		vm := workloads.VM{
 			Name:        fmt.Sprintf("%d_vm", node.NodeID),
-			Flist:       "https://hub.grid.tf/aelawady.3bot/benchmark.flist",
+			Flist:       "https://hub.grid.tf/amryassir.3bot/benchmark.flist",
 			CPU:         2,
 			Planetary:   true,
 			Memory:      1024,
@@ -124,7 +110,7 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 				"SSH_KEY":       cfg.SSHKey,
 			},
 		}
-		d := workloads.NewDeployment(
+		dl := workloads.NewDeployment(
 			fmt.Sprintf("deployment_%d", node.NodeID),
 			uint32(node.NodeID),
 			"",
@@ -135,8 +121,11 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			[]workloads.VM{vm},
 			nil,
 		)
+		vmObj, _ := tfPluginClient.State.LoadVMFromGrid(ctx, uint32(node.NodeID), vm.Name, dl.Name)
+		fmt.Println(vmObj.IP)
+
 		networks = append(networks, &net)
-		vms = append(vms, &d)
+		vms = append(vms, &dl)
 	}
 	err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
 	if err != nil {
@@ -152,6 +141,10 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			return err
 		}
 	}
+	for i := range vms {
+		_ = tfPluginClient.DeploymentDeployer.Cancel(ctx, vms[i])
+	}
+
 	return nil
 }
 
@@ -168,5 +161,19 @@ func handleFailure(err error, cfg Config) {
 		fmt.Println("Stopping due to error:", err)
 	default:
 		fmt.Println("Unknown failure strategy")
+	}
+}
+
+func calculateVMCount(nodes []types.Node, strategy string) int {
+	totalNodes := len(nodes)
+	switch strategy {
+	case "100%":
+		return totalNodes
+	case "70%":
+		return int(float64(totalNodes) * 0.7)
+	case "50%":
+		return int(float64(totalNodes) * 0.5)
+	default:
+		return totalNodes
 	}
 }
