@@ -1,6 +1,6 @@
 farms:
   - 1
-deployment_strategy: "100" #options: "70%", "50%", etc
+deployment_strategy: "100%" #options: "70%", "50%", etc
 grid_endpoints:
   graphql: "https://graphql.test.grid.tf/graphql"
   proxy: "https://gridproxy.test.grid.tf/"
@@ -8,10 +8,10 @@ grid_endpoints:
   subsrate_url: "wss://tfchain.dev.grid.tf/ws"
 mnemonic: "lonely spoon west coral tool pulse garbage garlic sick lumber slight animal" # mnemonic of the user
 failure_strategy: "retry"  # Other options: "stop", "destroy-all", "destroy-failing"
-ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsnouceyLPDj1OFjMO0amzznxbSurxLbZ21WEY5o6uaBuhAlDa2zMIvN8gmeZZeJcKHZfOZI0+atVo0FCjFc2VWZX7LwasW4Lbb2MV3xk4RTlkIRlKov/Iyj8lcAXEnFIV81fpLZtTmk6ERp5gYIBYP2n5CISK0lCiWeu/QFerYa9lb1cYpo/+epSREts4ka80XifA12kWMKfDNJKcWqv4EZZyRyPTVTTxKSJzHahu+J+Kpg+fs65toRaDAuXDzwBLJ/d2qCeR3dfbJl681jiFUlS46ap4njSrnGLssSSwpbhxPEWF3lJ+mQFn14aPLQikq4lOhGUhq7BCYQH9RNkZ"
+ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCchyWSqE2D2sBMw91Ukqku3YRog2LvMA62fyIwGvWrtZ/gBIqyzQCNo0q0yhI5ZEFI3xRVHyf7bRPiJwrMAQQcsAi6SpM9vK2ELj0quIHu4N3EnkPmxN63cS4c28W3QOVEDQT2G8rbhInALFc17zdJvsPfz7woBEjylUQK7gOIZbKtA5YYlZqGdpPZtaHvWSCVtlP0E2ND6KP0Q6K8CfkMOnIUsEhliM5OquMTD2bxhiiirkHHoj0nk+OzoMXqHFheH5HFOA/fWMPu98y6ShOdv2a4ttLZuolXkAk9qWqjp3RQd9pX97KLqXMxpe/UDGqfEuvCMq2L+Ph/5ufGV2rORRx1X9IfHYc480LEjPJUjC1RdUEj6fBJe9MCGyD41iAPktP6+uGkroGyfa7i7C+x1nO4e54FazC4yrp0/RdzF6MbwWn1/HxhpMLW8aQfdPLrrARs2uIIUROStCGh+KpSAQ2ZxXWB0Crb0HKBxCDgBtRov16TJBlPww8khWwbX4XvRhlPEOcGtIRqTe9CoClZ/w0TChJ/LWvUHDmjG8g/whQjidf56wgCd2i+RBMjevjslQlWnYSGQ/7BYW+OGE5RaB88poDAtc5Wy4O7lzJ4/I2rqi7tZedHB1K4T3/JkDj1n2/MqbLJfW/YPGQ8m+O+Rgc935tHyGfMQFHG2YSe7Q== mercury"
 
 influx:
-  url: "http://localhost:8086/orgs/c00e45f974a7d9a7"
+  url: "http://localhost:8086/orgs/ebd9e5e1e594e70e"
   org: "tf"
   token: "123"
   bucket: "init"

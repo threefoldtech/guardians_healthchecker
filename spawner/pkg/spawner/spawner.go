@@ -6,6 +6,8 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -21,10 +23,9 @@ const (
 	gb                = 1024 * 1024 * 1024
 )
 
-func RunDeployer(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient, debug bool) error {
+func RunDeployer(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-
 	deploymentStart := time.Now()
 
 	// close ctx on SIGTERM
@@ -43,13 +44,11 @@ func RunDeployer(ctx context.Context, cfg Config, tfPluginClient deployer.TFPlug
 			return err
 		}
 		vmCount := calculateVMCount(nodes, cfg.DeploymentStrategy)
-
 		err = spawn(ctx, tfPluginClient, cfg, nodes, vmCount)
 		if err != nil {
 			return err
 		}
 	}
-
 	endTime := time.Since(deploymentStart)
 	log.Info().Msgf("Deployment took %s", endTime)
 
@@ -68,11 +67,11 @@ func getNodes(ctx context.Context, tfPluginClient deployer.TFPluginClient, farm 
 		FreeSRU: &freeSRU,
 		FarmIDs: []uint64{farm},
 	}
-
 	nodes, err := deployer.FilterNodes(ctx, tfPluginClient, filter, []uint64{freeSRU}, nil, nil)
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
+
 	return nodes, nil
 }
 
@@ -83,7 +82,7 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 	for i := 0; i < vmCount; i++ {
 		node := nodes[i]
 
-		net := workloads.ZNet{
+		network := workloads.ZNet{
 			Name:  fmt.Sprintf("%d_network", node.NodeID),
 			Nodes: []uint32{uint32(node.NodeID)},
 			IPRange: gridtypes.NewIPNet(net.IPNet{
@@ -99,7 +98,7 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			Planetary:   true,
 			Memory:      1024,
 			Entrypoint:  "/sbin/zinit init",
-			NetworkName: net.Name,
+			NetworkName: network.Name,
 			EnvVars: map[string]string{
 				"INFLUX_URL":    cfg.Influx.URL,
 				"INFLUX_ORG":    cfg.Influx.Org,
@@ -115,16 +114,14 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			uint32(node.NodeID),
 			"",
 			nil,
-			net.Name,
+			network.Name,
 			nil,
 			nil,
 			[]workloads.VM{vm},
 			nil,
 		)
-		vmObj, _ := tfPluginClient.State.LoadVMFromGrid(ctx, uint32(node.NodeID), vm.Name, dl.Name)
-		fmt.Println(vmObj.IP)
 
-		networks = append(networks, &net)
+		networks = append(networks, &network)
 		vms = append(vms, &dl)
 	}
 	err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
@@ -141,11 +138,20 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			return err
 		}
 	}
-	for i := range vms {
-		_ = tfPluginClient.DeploymentDeployer.Cancel(ctx, vms[i])
-	}
 
 	return nil
+}
+
+func calculateVMCount(nodes []types.Node, strategy string) int {
+	totalNodes := len(nodes)
+
+	strategy = strings.TrimSuffix(strategy, "%")
+	percent, err := strconv.ParseFloat(strategy, 64)
+	if err != nil || percent < 0 || percent > 100 {
+		percent = 100
+	}
+
+	return int(float64(totalNodes) * (percent / 100))
 }
 
 func handleFailure(err error, cfg Config) {
@@ -161,19 +167,5 @@ func handleFailure(err error, cfg Config) {
 		fmt.Println("Stopping due to error:", err)
 	default:
 		fmt.Println("Unknown failure strategy")
-	}
-}
-
-func calculateVMCount(nodes []types.Node, strategy string) int {
-	totalNodes := len(nodes)
-	switch strategy {
-	case "100%":
-		return totalNodes
-	case "70%":
-		return int(float64(totalNodes) * 0.7)
-	case "50%":
-		return int(float64(totalNodes) * 0.5)
-	default:
-		return totalNodes
 	}
 }

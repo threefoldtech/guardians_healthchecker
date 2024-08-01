@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	spawner "github.com/threefoldtech/guardians_healthchecker/spawner/pkg/deployer"
+	spawner "github.com/threefoldtech/guardians_healthchecker/spawner/pkg/spawner"
 	"gopkg.in/yaml.v3"
 )
 

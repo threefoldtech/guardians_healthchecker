@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/threefoldtech/guardians_healthchecker/spawner/internal/parser"
-	"github.com/threefoldtech/guardians_healthchecker/spawner/pkg/deployer"
+	deployer "github.com/threefoldtech/guardians_healthchecker/spawner/pkg/spawner"
 )
 
 var spawnCmd = &cobra.Command{
@@ -19,11 +19,6 @@ var spawnCmd = &cobra.Command{
 		// It doesn't have a subcommand
 		if len(cmd.Flags().Args()) != 0 {
 			return fmt.Errorf("'spawn' and %v cannot be used together, please use one command at a time", cmd.Flags().Args())
-		}
-
-		debug, err := cmd.Flags().GetBool("debug")
-		if err != nil {
-			return fmt.Errorf("invalid log debug mode input '%v' with error: %w", debug, err)
 		}
 
 		configPath, err := cmd.Flags().GetString("config")
@@ -51,13 +46,13 @@ var spawnCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse configuration file '%s' with error: %w", configPath, err)
 		}
 
-		tfPluginClient, err := setup(cfg, debug)
+		tfPluginClient, err := setup(cfg)
 		if err != nil {
 			return err
 		}
 
 		ctx := context.Background()
-		if errs := deployer.RunDeployer(ctx, cfg, tfPluginClient, debug); errs != nil {
+		if errs := deployer.RunDeployer(ctx, cfg, tfPluginClient); errs != nil {
 			log.Error().Msg("deployments failed with errors: ")
 			fmt.Println(errs)
 			os.Exit(1)

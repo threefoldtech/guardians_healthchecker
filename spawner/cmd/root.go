@@ -19,7 +19,6 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(spawnCmd)
 	// rootCmd.AddCommand(destroyCmd)
 	// rootCmd.AddCommand(listCmd)
@@ -31,12 +30,7 @@ func Execute() {
 }
 
 func init() {
-	spawnCmd.Flags().BoolP("debug", "d", false, "allow debug logs")
 	spawnCmd.Flags().StringP("config", "c", "", "path to config file")
-
-	// destroyCmd.Flags().BoolP("debug", "d", false, "allow debug logs")
 	// destroyCmd.Flags().StringP("config", "c", "", "path to config file")
-
-	// listCmd.Flags().BoolP("debug", "d", false, "allow debug logs")
 	// listCmd.Flags().StringP("config", "c", "", "path to config file")
 }
