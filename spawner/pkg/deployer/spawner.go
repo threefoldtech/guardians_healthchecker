@@ -108,12 +108,21 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 		}
 		vm := workloads.VM{
 			Name:        fmt.Sprintf("%d_vm", node.NodeID),
-			Flist:       "https://hub.grid.tf/tf-official-apps/base:latest.flist",
+			Flist:       "https://hub.grid.tf/aelawady.3bot/benchmark.flist",
 			CPU:         2,
 			Planetary:   true,
 			Memory:      1024,
 			Entrypoint:  "/sbin/zinit init",
 			NetworkName: net.Name,
+			EnvVars: map[string]string{
+				"INFLUX_URL":    cfg.Influx.URL,
+				"INFLUX_ORG":    cfg.Influx.Org,
+				"INFLUX_TOKEN":  cfg.Influx.Token,
+				"INFLUX_BUCKET": cfg.Influx.Bucket,
+				"NODE_ID":       fmt.Sprintf("%d", node.NodeID),
+				"FARM_ID":       fmt.Sprintf("%d", node.FarmID),
+				"SSH_KEY":       cfg.SSHKey,
+			},
 		}
 		d := workloads.NewDeployment(
 			fmt.Sprintf("deployment_%d", node.NodeID),

@@ -8,3 +8,10 @@ grid_endpoints:
   subsrate_url: "wss://tfchain.dev.grid.tf/ws"
 mnemonic: "lonely spoon west coral tool pulse garbage garlic sick lumber slight animal" # mnemonic of the user
 failure_strategy: "retry"  # Other options: "stop", "destroy-all", "destroy-failing"
+ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsnouceyLPDj1OFjMO0amzznxbSurxLbZ21WEY5o6uaBuhAlDa2zMIvN8gmeZZeJcKHZfOZI0+atVo0FCjFc2VWZX7LwasW4Lbb2MV3xk4RTlkIRlKov/Iyj8lcAXEnFIV81fpLZtTmk6ERp5gYIBYP2n5CISK0lCiWeu/QFerYa9lb1cYpo/+epSREts4ka80XifA12kWMKfDNJKcWqv4EZZyRyPTVTTxKSJzHahu+J+Kpg+fs65toRaDAuXDzwBLJ/d2qCeR3dfbJl681jiFUlS46ap4njSrnGLssSSwpbhxPEWF3lJ+mQFn14aPLQikq4lOhGUhq7BCYQH9RNkZ"
+
+influx:
+  url: "http://localhost:8086/orgs/c00e45f974a7d9a7"
+  org: "tf"
+  token: "123"
+  bucket: "init"
