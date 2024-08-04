@@ -6,19 +6,18 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/threefoldtech/guardians_healthchecker/spawner/internal/parser"
 	spawner "github.com/threefoldtech/guardians_healthchecker/spawner/pkg/spawner"
 )
 
-var spawnCmd = &cobra.Command{
-	Use:   "spawn",
-	Short: "spawn VMs on all nodes in a list of farms",
+var destroyCmd = &cobra.Command{
+	Use:   "destroy",
+	Short: "destroy VMs on specified farms",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// It doesn't have a subcommand
 		if len(cmd.Flags().Args()) != 0 {
-			return fmt.Errorf("'spawn' and %v cannot be used together, please use one command at a time", cmd.Flags().Args())
+			return fmt.Errorf("'destroy' and %v cannot be used together, please use one command at a time", cmd.Flags().Args())
 		}
 
 		configPath, err := cmd.Flags().GetString("config")
@@ -52,10 +51,9 @@ var spawnCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		if errs := spawner.RunSpawner(ctx, cfg, tfPluginClient); errs != nil {
-			log.Error().Msg("deployments failed with errors: ")
-			fmt.Println(errs)
-			os.Exit(1)
+		err = spawner.DestroyVms(ctx, cfg, tfPluginClient)
+		if err != nil {
+			return fmt.Errorf("failed to destroy VMs with error: %w", err)
 		}
 
 		return nil

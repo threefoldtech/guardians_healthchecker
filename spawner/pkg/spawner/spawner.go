@@ -1,4 +1,4 @@
-package deployer
+package spawner
 
 import (
 	"context"
@@ -23,7 +23,7 @@ const (
 	gb                = 1024 * 1024 * 1024
 )
 
-func RunDeployer(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
+func RunSpawner(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	deploymentStart := time.Now()
@@ -83,16 +83,17 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 		node := nodes[i]
 
 		network := workloads.ZNet{
-			Name:  fmt.Sprintf("%d_network", node.NodeID),
+			Name:  fmt.Sprintf("network_%d", node.NodeID),
 			Nodes: []uint32{uint32(node.NodeID)},
 			IPRange: gridtypes.NewIPNet(net.IPNet{
 				IP:   net.IPv4(10, 20, 0, 0),
 				Mask: net.CIDRMask(16, 32),
 			}),
-			AddWGAccess: false,
+			AddWGAccess:  false,
+			SolutionType: fmt.Sprintf("net/%s", node.ID),
 		}
 		vm := workloads.VM{
-			Name:        fmt.Sprintf("%d_vm", node.NodeID),
+			Name:        fmt.Sprintf("vm_%d", node.NodeID),
 			Flist:       "https://hub.grid.tf/amryassir.3bot/benchmark.flist",
 			CPU:         2,
 			Planetary:   true,
@@ -110,9 +111,9 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			},
 		}
 		dl := workloads.NewDeployment(
-			fmt.Sprintf("deployment_%d", node.NodeID),
+			fmt.Sprintf("vm_%d", node.NodeID),
 			uint32(node.NodeID),
-			"",
+			fmt.Sprintf("vm/%s", node.ID),
 			nil,
 			network.Name,
 			nil,

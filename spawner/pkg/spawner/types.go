@@ -1,4 +1,4 @@
-package deployer
+package spawner
 
 type Config struct {
 	Farms              []uint64     `yaml:"farms"`

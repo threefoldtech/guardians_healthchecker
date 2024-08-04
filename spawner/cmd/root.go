@@ -20,7 +20,7 @@ func Execute() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	rootCmd.AddCommand(spawnCmd)
-	// rootCmd.AddCommand(destroyCmd)
+	rootCmd.AddCommand(destroyCmd)
 	// rootCmd.AddCommand(listCmd)
 
 	err := rootCmd.Execute()
@@ -31,6 +31,6 @@ func Execute() {
 
 func init() {
 	spawnCmd.Flags().StringP("config", "c", "", "path to config file")
-	// destroyCmd.Flags().StringP("config", "c", "", "path to config file")
+	destroyCmd.Flags().StringP("config", "c", "", "path to config file")
 	// listCmd.Flags().StringP("config", "c", "", "path to config file")
 }
