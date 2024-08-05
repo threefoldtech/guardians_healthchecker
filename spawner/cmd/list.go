@@ -57,14 +57,9 @@ var listCmd = &cobra.Command{
 		}
 
 		for _, vm := range vms {
-			fmt.Printf("VM Name: %s, Running Time: %s\n", vm.Name, vm.RunningTime)
+			fmt.Printf("VM Name: %s", vm.Name)
 		}
 
 		return nil
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().StringP("config", "c", "", "Path to the configuration file")
 }
