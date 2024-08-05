@@ -10,24 +10,11 @@ import (
 func DestroyVms(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 
 	for _, farm := range cfg.Farms {
-		nodes, err := getNodes(ctx, tfPluginClient, farm)
+		name := fmt.Sprintf("vm/%s", farm)
+
+		err := tfPluginClient.CancelByProjectName(name, true)
 		if err != nil {
 			return err
-		}
-
-		for _, node := range nodes {
-			vmName := fmt.Sprintf("vm/%s", node.ID)
-			networkName := fmt.Sprintf("net/%s", node.ID)
-
-			err = tfPluginClient.CancelByProjectName(vmName, true)
-			if err != nil {
-				return err
-			}
-
-			err = tfPluginClient.CancelByProjectName(networkName, true)
-			if err != nil {
-				return err
-			}
 		}
 	}
 

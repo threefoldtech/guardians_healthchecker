@@ -14,6 +14,7 @@ func setup(conf spawner.Config) (deployer.TFPluginClient, error) {
 		deployer.WithProxyURL(conf.GridEndpoints.Proxy),
 		deployer.WithRelayURL(conf.GridEndpoints.Relay),
 		deployer.WithSubstrateURL(conf.GridEndpoints.SubsrateURL),
+		// deployer.WithGraphQlURL(conf.GridEndpoints.GraphQl),
 	}
 
 	return deployer.NewTFPluginClient(mnemonic, opts...)

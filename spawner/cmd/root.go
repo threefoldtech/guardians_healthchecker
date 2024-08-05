@@ -21,7 +21,7 @@ func Execute() {
 
 	rootCmd.AddCommand(spawnCmd)
 	rootCmd.AddCommand(destroyCmd)
-	// rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(listCmd)
 
 	err := rootCmd.Execute()
 	if err != nil {
@@ -32,5 +32,5 @@ func Execute() {
 func init() {
 	spawnCmd.Flags().StringP("config", "c", "", "path to config file")
 	destroyCmd.Flags().StringP("config", "c", "", "path to config file")
-	// listCmd.Flags().StringP("config", "c", "", "path to config file")
+	listCmd.Flags().StringP("config", "c", "", "path to config file")
 }

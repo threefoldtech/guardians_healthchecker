@@ -90,7 +90,7 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 				Mask: net.CIDRMask(16, 32),
 			}),
 			AddWGAccess:  false,
-			SolutionType: fmt.Sprintf("net/%s", node.ID),
+			SolutionType: fmt.Sprintf("vm/%s", node.FarmID),
 		}
 		vm := workloads.VM{
 			Name:        fmt.Sprintf("vm_%d", node.NodeID),
@@ -113,7 +113,7 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 		dl := workloads.NewDeployment(
 			fmt.Sprintf("vm_%d", node.NodeID),
 			uint32(node.NodeID),
-			fmt.Sprintf("vm/%s", node.ID),
+			fmt.Sprintf("vm/%s", node.FarmID),
 			nil,
 			network.Name,
 			nil,

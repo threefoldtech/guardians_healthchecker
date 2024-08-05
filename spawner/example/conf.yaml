@@ -2,8 +2,8 @@ farms:
   - 1
 deployment_strategy: "100%" #options: "70%", "50%", etc
 grid_endpoints:
-  graphql: "https://graphql.test.grid.tf/graphql"
-  proxy: "https://gridproxy.test.grid.tf/"
+  graphql: "https://graphql.dev.grid.tf/graphql"
+  proxy: "https://gridproxy.dev.grid.tf/"
   relay: "wss://relay.dev.grid.tf"
   subsrate_url: "wss://tfchain.dev.grid.tf/ws"
 failure_strategy: "retry"  # Other options: "stop", "destroy-all", "destroy-failing"
