@@ -56,8 +56,9 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("failed to list VMs: %w", err)
 		}
 
+		fmt.Printf("%-8s %-8s %-10s %-10s %-15s\n", "Farm", "Node", "Name", "Contract", "ProjectName")
 		for _, vm := range vms {
-			fmt.Printf("VM Name: %s", vm.Name)
+			fmt.Printf("%-8d %-8d %-10s %-10d %-15s\n", vm.Farm, vm.Node, vm.Name, vm.Contract, vm.ProjectName)
 		}
 
 		return nil

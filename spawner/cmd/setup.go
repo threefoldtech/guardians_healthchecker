@@ -5,16 +5,17 @@ import (
 	"github.com/threefoldtech/tfgrid-sdk-go/grid-client/deployer"
 )
 
-func setup(conf spawner.Config) (deployer.TFPluginClient, error) {
-	mnemonic := conf.Mnemonic
+func setup(cfg spawner.Config) (deployer.TFPluginClient, error) {
+	mnemonic := cfg.Mnemonic
 
 	opts := []deployer.PluginOpt{
+		deployer.WithNetwork("dev"),
 		deployer.WithTwinCache(),
 		deployer.WithRMBTimeout(30),
-		deployer.WithProxyURL(conf.GridEndpoints.Proxy),
-		deployer.WithRelayURL(conf.GridEndpoints.Relay),
-		deployer.WithSubstrateURL(conf.GridEndpoints.SubsrateURL),
-		// deployer.WithGraphQlURL(conf.GridEndpoints.GraphQl),
+		deployer.WithProxyURL(cfg.GridEndpoints.Proxy),
+		deployer.WithRelayURL(cfg.GridEndpoints.Relay),
+		deployer.WithSubstrateURL(cfg.GridEndpoints.SubsrateURL),
+		// deployer.WithGraphQlURL(cfg.GridEndpoints.GraphQl),
 	}
 
 	return deployer.NewTFPluginClient(mnemonic, opts...)

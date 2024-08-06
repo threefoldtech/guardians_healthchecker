@@ -2,22 +2,14 @@ package spawner
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
-	// "time"
-
 	"github.com/threefoldtech/tfgrid-sdk-go/grid-client/deployer"
-	"github.com/threefoldtech/tfgrid-sdk-go/grid-client/workloads"
 )
 
-type vmInfo struct {
-	Name string
-	// RunningTime time.Duration
-}
-
 func ListVMs(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) ([]vmInfo, error) {
-	var deployments []workloads.Deployment
 	var vms []vmInfo
 
 	for _, farm := range cfg.Farms {
@@ -30,40 +22,40 @@ func ListVMs(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginCl
 			return nil, fmt.Errorf("couldn't find any contracts with name %s", name)
 		}
 
-		var nodeID uint32
-
 		for _, contract := range contracts.NodeContracts {
 			contractID, err := strconv.ParseUint(contract.ContractID, 10, 64)
 			if err != nil {
 				return nil, err
 			}
-			nodeID = contract.NodeID
-			checkIfExistAndAppend(tfPluginClient, nodeID, contractID)
-			deployment, err := tfPluginClient.State.LoadDeploymentFromGrid(ctx, nodeID, name)
+
+			nodeID := contract.NodeID
+
+			nodeClient, err := tfPluginClient.State.NcPool.GetNodeClient(tfPluginClient.State.Substrate, nodeID)
 			if err != nil {
 				return nil, err
 			}
-			deployments = append(deployments, deployment)
-		}
 
-		for _, deployment := range deployments {
-			vms = append(vms, vmInfo{
-				Name: deployment.Name,
-				// RunningTime: deployment.,
-			})
+			dl, err := nodeClient.DeploymentGet(ctx, contractID)
+			if err != nil {
+				return nil, err
+			}
 
+			var metadata deploymentMetadata
+			err = json.Unmarshal([]byte(dl.Metadata), &metadata)
+			if err != nil {
+				return nil, err
+			}
+
+			if metadata.Type == "vm" {
+				vms = append(vms, vmInfo{
+					Farm:        farm,
+					Node:        nodeID,
+					Name:        metadata.Name,
+					Contract:    contractID,
+					ProjectName: metadata.ProjectName,
+				})
+			}
 		}
 	}
-
 	return vms, nil
-}
-
-func checkIfExistAndAppend(t deployer.TFPluginClient, node uint32, contractID uint64) {
-	for _, n := range t.State.CurrentNodeDeployments[node] {
-		if n == contractID {
-			return
-		}
-	}
-
-	t.State.CurrentNodeDeployments[node] = append(t.State.CurrentNodeDeployments[node], contractID)
 }

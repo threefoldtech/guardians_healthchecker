@@ -24,3 +24,18 @@ type InfluxConfig struct {
 	Token  string `yaml:"token"`
 	Bucket string `yaml:"bucket"`
 }
+
+type vmInfo struct {
+	Farm        uint64
+	Node        uint32
+	Name        string `json:"name"`
+	Contract    uint64
+	ProjectName string `json:"projectName"`
+}
+
+type deploymentMetadata struct {
+	Version     int    `json:"version"`
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	ProjectName string `json:"projectName"`
+}
