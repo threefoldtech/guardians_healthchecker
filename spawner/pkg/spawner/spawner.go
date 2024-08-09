@@ -127,17 +127,11 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 	}
 	err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
 	if err != nil {
-		handleFailure(err, cfg)
-		if cfg.FailureStrategy == "stop" {
-			return err
-		}
+		handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
 	}
 	err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)
 	if err != nil {
-		handleFailure(err, cfg)
-		if cfg.FailureStrategy == "stop" {
-			return err
-		}
+		handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
 	}
 
 	return nil
@@ -155,18 +149,47 @@ func calculateVMCount(nodes []types.Node, strategy string) int {
 	return int(float64(totalNodes) * (percent / 100))
 }
 
-func handleFailure(err error, cfg Config) {
+func handleFailure(ctx context.Context, err error, cfg Config, tfPluginClient deployer.TFPluginClient, networks []*workloads.ZNet, vms []*workloads.Deployment) error {
 	switch cfg.FailureStrategy {
 	case "retry":
-		// Retry logic
+		for i := 0; i < defaultMaxRetries; i++ {
+			fmt.Printf("Retrying deployment... Attempt %d/%d\n", i+1, defaultMaxRetries)
+			err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
+			if err == nil {
+				err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)
+			}
+			if err == nil {
+				return nil
+			}
+		}
+		fmt.Println("Retry attempts failed.")
+		return err
+
 	case "destroy-all":
-		// Destroy all VMs
+		fmt.Println("Destroying all VMs due to failure...")
+		for _, vm := range vms {
+			err := tfPluginClient.DeploymentDeployer.Cancel(ctx, vm)
+			if err != nil {
+				fmt.Printf("Failed to destroy VM: %s\n", vm.Name)
+			}
+		}
+		return err
+
 	case "destroy-failing":
-		// Destroy VMs in farms with failing nodes
+		fmt.Println("Destroying VMs in farms with failing nodes...")
+		for _, vm := range vms {
+			if destroyErr := tfPluginClient.DeploymentDeployer.Cancel(ctx, vm); destroyErr != nil {
+				fmt.Printf("Destroyed failing VM: %s\n", vm.Name)
+			}
+		}
+		return err
+
 	case "stop":
-		// Log the error and stop further actions
-		fmt.Println("Stopping due to error:", err)
+		fmt.Println("Stopping operation due to failure...")
+		return err
+
 	default:
 		fmt.Println("Unknown failure strategy")
+		return fmt.Errorf("unknown failure strategy: %s", cfg.FailureStrategy)
 	}
 }
