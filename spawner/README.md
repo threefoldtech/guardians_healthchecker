@@ -50,13 +50,13 @@ To spawn VMs, use the following command:
 spawner spawn -c <config-file-path>
 ```
 
-## Destroying VMs
+### Destroying VMs
 To destroy VMs, use the following command:
 ``` bash
 spawner destroy -c <config-file-path>
 ```
 
-## Listing VMs
+### Listing VMs
 To list VMs, use the following command:
 ``` bash
 spawner list -c <config-file-path>
