@@ -5,7 +5,6 @@ import (
 	"github.com/threefoldtech/tfgrid-sdk-go/grid-client/deployer"
 )
 
-
 // setup sets up a new TFPluginClient
 func setup(cfg spawner.Config) (deployer.TFPluginClient, error) {
 	mnemonic := cfg.Mnemonic
