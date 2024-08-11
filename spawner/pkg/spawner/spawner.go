@@ -127,11 +127,17 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 	}
 	err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
 	if err != nil {
-		handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
+		err = handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
+		if err != nil {
+			return err
+		}
 	}
 	err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)
 	if err != nil {
-		handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
+		err = handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
