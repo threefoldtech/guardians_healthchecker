@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// ParseConfig parse the config file
 func ParseConfig(file io.Reader) (spawner.Config, error) {
 	conf := spawner.Config{}
 
@@ -19,7 +20,7 @@ func ParseConfig(file io.Reader) (spawner.Config, error) {
 	if err != nil {
 		return spawner.Config{}, err
 	}
-	if err := validateMnemonic(conf.Mnemonic); err != nil {
+	if err := ValidateConfig(conf); err != nil {
 		return spawner.Config{}, err
 	}
 

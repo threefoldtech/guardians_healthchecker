@@ -11,6 +11,7 @@ import (
 	spawner "github.com/threefoldtech/guardians_healthchecker/spawner/pkg/spawner"
 )
 
+// list command
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list VMs and how long they have been running",

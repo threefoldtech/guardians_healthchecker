@@ -1,8 +1,9 @@
 package spawner
 
+// Config holds the configuration settings for the spawner tool.
 type Config struct {
 	Farms              []uint64     `yaml:"farms"`
-	DeploymentStrategy string       `yaml:"deployment_strategy"`
+	DeploymentStrategy float64      `yaml:"deployment_strategy"`
 	GridEndpoints      Endpoints    `yaml:"grid_endpoints"`
 	Mnemonic           string       `yaml:"mnemonic"`
 	FailureStrategy    string       `yaml:"failure_strategy"`
@@ -11,6 +12,7 @@ type Config struct {
 	Influx             InfluxConfig `yaml:"influx"`
 }
 
+// Endpoints holds the URLs for grid
 type Endpoints struct {
 	GraphQl     string `yaml:"graphql"`
 	Proxy       string `yaml:"proxy"`
@@ -18,6 +20,7 @@ type Endpoints struct {
 	SubsrateURL string `yaml:"subsrate_url"`
 }
 
+// InfluxConfig contains the configuration settings for connecting to an InfluxDB instance.
 type InfluxConfig struct {
 	URL    string `yaml:"url"`
 	Org    string `yaml:"org"`
@@ -25,6 +28,7 @@ type InfluxConfig struct {
 	Bucket string `yaml:"bucket"`
 }
 
+// vmInfo stores information about a specific VM.
 type vmInfo struct {
 	Farm        uint64
 	Node        uint32
@@ -33,6 +37,7 @@ type vmInfo struct {
 	ProjectName string `json:"projectName"`
 }
 
+// deploymentMetadata holds metadata for a deployment.
 type deploymentMetadata struct {
 	Version     int    `json:"version"`
 	Type        string `json:"type"`

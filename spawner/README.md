@@ -18,6 +18,10 @@ Inside the spawner directory run the following command:
 ``` bash
 make build
 ```
+Move the binary to any of `$PATH` directories, for example:
+``` bash
+mv spawner /usr/local/bin
+```
 
 ## Supported Configurations
 Create a new configuration file, for example `config.yaml`

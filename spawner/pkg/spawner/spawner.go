@@ -6,8 +6,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -23,6 +21,7 @@ const (
 	gb                = 1024 * 1024 * 1024
 )
 
+// RunSpawner given a list of farm IDs, it spawns VMs on all nodes in these farms
 func RunSpawner(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -55,6 +54,7 @@ func RunSpawner(ctx context.Context, cfg Config, tfPluginClient deployer.TFPlugi
 	return nil
 }
 
+// getNodes returns all the nodes on a specified farm
 func getNodes(ctx context.Context, tfPluginClient deployer.TFPluginClient, farm uint64) ([]types.Node, error) {
 	trueVal := true
 	freeMRU := uint64(4 * gb)
@@ -75,6 +75,7 @@ func getNodes(ctx context.Context, tfPluginClient deployer.TFPluginClient, farm 
 	return nodes, nil
 }
 
+// spawn creates and deploys VMs on the specified nodes according to the provided configuration
 func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Config, nodes []types.Node, vmCount int) error {
 	var networks []*workloads.ZNet
 	var vms []*workloads.Deployment
@@ -143,18 +144,14 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 	return nil
 }
 
-func calculateVMCount(nodes []types.Node, strategy string) int {
+// calculateVMCount calculates the number of VMs to deploy based on the deployment strategy
+func calculateVMCount(nodes []types.Node, strategy float64) int {
 	totalNodes := len(nodes)
 
-	strategy = strings.TrimSuffix(strategy, "%")
-	percent, err := strconv.ParseFloat(strategy, 64)
-	if err != nil || percent < 0 || percent > 100 {
-		percent = 100
-	}
-
-	return int(float64(totalNodes) * (percent / 100))
+	return int(float64(totalNodes) * strategy)
 }
 
+// handleFailure handles deployment failures according to the specified failure strategy
 func handleFailure(ctx context.Context, err error, cfg Config, tfPluginClient deployer.TFPluginClient, networks []*workloads.ZNet, vms []*workloads.Deployment) error {
 	switch cfg.FailureStrategy {
 	case "retry":

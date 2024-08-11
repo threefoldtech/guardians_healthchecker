@@ -11,6 +11,7 @@ import (
 	spawner "github.com/threefoldtech/guardians_healthchecker/spawner/pkg/spawner"
 )
 
+// destroy command
 var destroyCmd = &cobra.Command{
 	Use:   "destroy",
 	Short: "destroy VMs on specified farms",

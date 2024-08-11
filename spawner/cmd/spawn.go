@@ -12,6 +12,7 @@ import (
 	spawner "github.com/threefoldtech/guardians_healthchecker/spawner/pkg/spawner"
 )
 
+// spawn command
 var spawnCmd = &cobra.Command{
 	Use:   "spawn",
 	Short: "spawn VMs on all nodes in a list of farms",

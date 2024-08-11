@@ -9,6 +9,7 @@ import (
 	"github.com/threefoldtech/tfgrid-sdk-go/grid-client/deployer"
 )
 
+// ListVMs lists running VMs on specified farms in the config file.
 func ListVMs(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	var vms []vmInfo
 

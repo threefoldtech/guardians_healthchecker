@@ -1,7 +1,7 @@
 farms:
   - 1
   - 2
-deployment_strategy: "100%" #options: "70%", "50%", etc
+deployment_strategy: 1 #options: "0.7", "0.5", etc
 grid_endpoints:
   graphql: "https://graphql.dev.grid.tf/graphql"
   proxy: "https://gridproxy.dev.grid.tf/"
