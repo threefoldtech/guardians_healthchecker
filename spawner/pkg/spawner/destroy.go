@@ -8,7 +8,7 @@ import (
 )
 
 // DestroyVms destroys VMs on specified farms in config file
-func DestroyVms(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
+func Destroy(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 
 	for _, farm := range cfg.Farms {
 		name := fmt.Sprintf("vm/%d", farm)

@@ -51,8 +51,8 @@ func validateGridEndpoints(endpoints types.Endpoints) error {
 	if !isValidUrl(endpoints.Relay) {
 		return fmt.Errorf("invalid Relay endpoint URL: %s", endpoints.Relay)
 	}
-	if !isValidUrl(endpoints.SubsrateURL) {
-		return fmt.Errorf("invalid Subsrate URL: %s", endpoints.SubsrateURL)
+	if !isValidUrl(endpoints.SubstrateURL) {
+		return fmt.Errorf("invalid Subsrate URL: %s", endpoints.SubstrateURL)
 	}
 
 	return nil

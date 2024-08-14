@@ -11,7 +11,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "spawner",
-	Short: "A tool used for spawning and destroying benchmark VMs",
+	Short: "tool used for spawning and destroying benchmark VMs",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -30,7 +30,5 @@ func Execute() {
 }
 
 func init() {
-	spawnCmd.Flags().StringP("config", "c", "", "path to config file")
-	destroyCmd.Flags().StringP("config", "c", "", "path to config file")
-	listCmd.Flags().StringP("config", "c", "", "path to config file")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "path to config file")
 }

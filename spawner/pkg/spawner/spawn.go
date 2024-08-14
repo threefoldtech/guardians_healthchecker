@@ -22,7 +22,7 @@ const (
 )
 
 // RunSpawner given a list of farm IDs, it spawns VMs on all nodes in these farms
-func RunSpawner(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
+func Spawner(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	deploymentStart := time.Now()
@@ -36,13 +36,17 @@ func RunSpawner(ctx context.Context, cfg Config, tfPluginClient deployer.TFPlugi
 	}()
 
 	for _, farm := range cfg.Farms {
-		log.Info().Uint64("Farm", farm).Msg("Running deployment")
+		log.Info().Uint64("Farm", farm).Msg("running deployment")
 
 		nodes, err := getNodes(ctx, tfPluginClient, farm)
 		if err != nil {
 			return err
 		}
 		vmCount := calculateVMCount(nodes, cfg.DeploymentStrategy)
+		if vmCount == 0 {
+			log.Fatal().Msg("there is nothing to deploy")
+			return nil
+		}
 		err = spawn(ctx, tfPluginClient, cfg, nodes, vmCount)
 		if err != nil {
 			return err
@@ -69,7 +73,7 @@ func getNodes(ctx context.Context, tfPluginClient deployer.TFPluginClient, farm 
 	}
 	nodes, err := deployer.FilterNodes(ctx, tfPluginClient, filter, []uint64{freeSRU}, nil, nil)
 	if err != nil {
-		log.Fatal().Err(err).Send()
+		return nil, err
 	}
 
 	return nodes, nil
@@ -156,7 +160,7 @@ func handleFailure(ctx context.Context, err error, cfg Config, tfPluginClient de
 	switch cfg.FailureStrategy {
 	case "retry":
 		for i := 0; i < defaultMaxRetries; i++ {
-			fmt.Printf("Retrying deployment... Attempt %d/%d\n", i+1, defaultMaxRetries)
+			log.Info().Msgf("Retrying deployment... Attempt %d/%d\n", i+1, defaultMaxRetries)
 			err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
 			if err == nil {
 				err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)

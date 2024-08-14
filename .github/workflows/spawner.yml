@@ -1,10 +1,9 @@
-# This workflow will build a golang project
+# This workflow will build, test, lint the project
 
 name: Spawner
 
 on:
   push:
-  pull_request:
 
 jobs:
 

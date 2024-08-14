@@ -26,23 +26,23 @@ mv spawner /usr/local/bin
 ## Supported Configurations
 Create a new configuration file, for example `config.yaml`
 
-| Field              | Description                                          | Supported Values                                     |
-| ------------------ | ---------------------------------------------------- | ---------------------------------------------------- |
-| `farms`            | List of farm IDs where VMs should be deployed        | List of integers (e.g., `1`, `2`, etc.)              |
-| `deployment_strategy` | Strategy for deploying VMs across nodes            | `"100%"`, `"70%"`, `"50%"`, etc.                     |
-| `grid_endpoints`   | URLs for grid services                                |                                                      |
-| `grid_endpoints.graphql`    | GraphQL endpoint URL                        | URL (e.g., `"https://graphql.dev.grid.tf/graphql"`)  |
-| `grid_endpoints.proxy`      | Proxy endpoint URL                          | URL (e.g., `"https://gridproxy.dev.grid.tf/"`)       |
-| `grid_endpoints.relay`      | Relay endpoint URL                          | URL (e.g., `"wss://relay.dev.grid.tf"`)              |
-| `grid_endpoints.subsrate_url` | Substrate URL                             | URL (e.g., `"wss://tfchain.dev.grid.tf/ws"`)         |
-| `failure_strategy` | Strategy for handling deployment failures            | `"retry"`, `"stop"`, `"destroy-all"`, `"destroy-failing"` |
-| `mnemonic`         | Mnemonic for authentication                          | String                                               |
-| `ssh_key`          | SSH key for accessing VMs                            | String                                               |
-| `influx`           | InfluxDB configuration                               |                                                      |
-| `influx.url`       | InfluxDB URL                                         | URL (e.g., `"http://influxdb.example.com"`)          |
-| `influx.org`       | InfluxDB organization name                           | String                                               |
-| `influx.token`     | InfluxDB access token                                | String                                               |
-| `influx.bucket`    | InfluxDB bucket name                                 | String                                               |
+| Field                  | Description                                          | Supported Values                                     | Required |
+| ---------------------- | ---------------------------------------------------- | ---------------------------------------------------- | -------- |
+| `farms`                | List of farm IDs where VMs should be deployed        | List of integers (e.g., `1`, `2`, etc.)              | Yes      |
+| `deployment_strategy`  | Strategy for deploying VMs across nodes              | `1`, `0.7`, `0.5`, etc.                              | Yes      |
+| `grid_endpoints`       | URLs for grid services                               |                                                      |      |
+| `grid_endpoints.graphql` | GraphQL endpoint URL                               | URL (e.g., `"https://graphql.dev.grid.tf/graphql"`)  | Yes      |
+| `grid_endpoints.proxy`   | Proxy endpoint URL                                 | URL (e.g., `"https://gridproxy.dev.grid.tf/"`)       | Yes      |
+| `grid_endpoints.relay`   | Relay endpoint URL                                 | URL (e.g., `"wss://relay.dev.grid.tf"`)              | Yes      |
+| `grid_endpoints.substrate_url` | Substrate URL                                | URL (e.g., `"wss://tfchain.dev.grid.tf/ws"`)         | Yes      |
+| `failure_strategy`     | Strategy for handling deployment failures            | `"retry"`, `"stop"`, `"destroy-all"`, `"destroy-failing"` | No       |
+| `mnemonic`             | Mnemonic for authentication                          | String                                               | Yes      |
+| `ssh_key`              | SSH key for accessing VMs                            | String                                               | Yes      |
+| `influx`               | InfluxDB configuration                               |                                                      |      |
+| `influx.url`           | InfluxDB URL                                         | URL (e.g., `"http://influxdb.example.com"`)          | Yes (if `influx` is provided) |
+| `influx.org`           | InfluxDB organization name                           | String                                               | Yes (if `influx` is provided) |
+| `influx.token`         | InfluxDB access token                                | String                                               | Yes (if `influx` is provided) |
+| `influx.bucket`        | InfluxDB bucket name                                 | String                                               | Yes (if `influx` is provided) |
 
 
 

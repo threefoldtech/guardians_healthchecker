@@ -10,7 +10,7 @@ import (
 )
 
 // ListVMs lists running VMs on specified farms in the config file.
-func ListVMs(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
+func List(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	var vms []vmInfo
 
 	for _, farm := range cfg.Farms {
@@ -53,7 +53,7 @@ func ListVMs(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginCl
 					Node:        nodeID,
 					Name:        metadata.Name,
 					Contract:    contractID,
-					ProjectName: metadata.ProjectName,
+					ProjectName: name,
 				})
 			}
 		}
