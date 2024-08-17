@@ -37,22 +37,17 @@ func validateDeploymentStrategy(strategy float64) error {
 
 // validateGridEndpoints checks if all grid endpoint URLs are valid
 func validateGridEndpoints(endpoints types.Endpoints) error {
-	isValidUrl := func(u string) bool {
-		_, err := url.ParseRequestURI(u)
-		return err == nil
-	}
-
-	if !isValidUrl(endpoints.GraphQl) {
+	if !isValidURL(endpoints.GraphQl, false) {
 		return fmt.Errorf("invalid GraphQl endpoint URL: %s", endpoints.GraphQl)
 	}
-	if !isValidUrl(endpoints.Proxy) {
+	if !isValidURL(endpoints.Proxy, false) {
 		return fmt.Errorf("invalid Proxy endpoint URL: %s", endpoints.Proxy)
 	}
-	if !isValidUrl(endpoints.Relay) {
+	if !isValidURL(endpoints.Relay, true) {
 		return fmt.Errorf("invalid Relay endpoint URL: %s", endpoints.Relay)
 	}
-	if !isValidUrl(endpoints.SubstrateURL) {
-		return fmt.Errorf("invalid Subsrate URL: %s", endpoints.SubstrateURL)
+	if !isValidURL(endpoints.SubstrateURL, true) {
+		return fmt.Errorf("invalid Substrate URL: %s", endpoints.SubstrateURL)
 	}
 
 	return nil
@@ -75,12 +70,7 @@ func validateFailureStrategy(strategy string) error {
 
 // validateInfluxConfig validates InfluxDB configuration fields
 func validateInfluxConfig(config types.InfluxConfig) error {
-	isValidURL := func(u string) bool {
-		_, err := url.ParseRequestURI(u)
-		return err == nil
-	}
-
-	if !isValidURL(config.URL) {
+	if !isValidURL(config.URL, false) {
 		return fmt.Errorf("invalid influx URL: %s", config.URL)
 	}
 	if strings.TrimSpace(config.Org) == "" {
@@ -117,4 +107,20 @@ func ValidateConfig(cfg types.Config) error {
 		return err
 	}
 	return nil
+}
+
+// isValidURL checks if the URL is valid and optionally ensures it uses the WebSocket protocol
+func isValidURL(u string, requireWebSocket bool) bool {
+	parsedURL, err := url.ParseRequestURI(u)
+	if err != nil {
+		return false
+	}
+
+	if requireWebSocket {
+		if parsedURL.Scheme != "ws" && parsedURL.Scheme != "wss" {
+			return false
+		}
+	}
+
+	return true
 }
