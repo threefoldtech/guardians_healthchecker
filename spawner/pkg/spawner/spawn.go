@@ -185,8 +185,8 @@ func handleFailure(ctx context.Context, err error, cfg Config, tfPluginClient de
 		return err
 
 	case "destroy-failing":
-		failingVMs, remainingNetworks := identifyFailingResources(vms, networks, err)
-		if destroyErr := destroyResources(ctx, tfPluginClient, remainingNetworks, failingVMs); destroyErr != nil {
+		failingVMs, failingNetworks := identifyFailingResources(vms, networks)
+		if destroyErr := destroyResources(ctx, tfPluginClient, failingNetworks, failingVMs); destroyErr != nil {
 			log.Error().Err(destroyErr).Msg("failed to destroy failing resources")
 			return destroyErr
 		}
@@ -233,11 +233,16 @@ func destroyResources(ctx context.Context, tfPluginClient deployer.TFPluginClien
 }
 
 // identifyFailingResources identifies the failing resources based on the error
-func identifyFailingResources(vms []*workloads.Deployment, networks []*workloads.ZNet, err error) ([]*workloads.Deployment, []*workloads.ZNet) {
+func identifyFailingResources(vms []*workloads.Deployment, networks []*workloads.ZNet) ([]*workloads.Deployment, []*workloads.ZNet) {
 	var failingVMs []*workloads.Deployment
-	var remainingNetworks []*workloads.ZNet
+	var failingNetworks []*workloads.ZNet
 
-	// implementation to identify the failling networks and vms!
+	for idx, vm := range vms {
+		if vm.ContractID == 0 || len(networks[idx].NodeDeploymentID) == 0 {
+			failingVMs = append(failingVMs, vm)
+			failingNetworks = append(failingNetworks, networks[idx])
+		}
+	}
 
-	return failingVMs, remainingNetworks
+	return failingVMs, failingNetworks
 }
