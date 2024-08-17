@@ -19,6 +19,9 @@ import (
 const (
 	defaultMaxRetries = 5
 	gb                = 1024 * 1024 * 1024
+	cpuCount          = 4
+	memorySize        = 8
+	rootSize          = 40
 )
 
 // RunSpawner given a list of farm IDs, it spawns VMs on all nodes in these farms
@@ -61,8 +64,8 @@ func Spawner(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginCl
 // getNodes returns all the nodes on a specified farm
 func getNodes(ctx context.Context, tfPluginClient deployer.TFPluginClient, farm uint64) ([]types.Node, error) {
 	trueVal := true
-	freeMRU := uint64(4 * gb)
-	freeSRU := uint64(20 * gb)
+	freeMRU := uint64(memorySize * gb)
+	freeSRU := uint64(rootSize * gb)
 
 	filter := types.NodeFilter{
 		Status:  []string{"up"},
@@ -100,9 +103,10 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 		vm := workloads.VM{
 			Name:        fmt.Sprintf("vm_%d", node.NodeID),
 			Flist:       "https://hub.grid.tf/amryassir.3bot/benchmark.flist",
-			CPU:         2,
+			CPU:         cpuCount,
 			Planetary:   true,
-			Memory:      1024,
+			Memory:      memorySize * 1024,
+			RootfsSize:  rootSize * 1024,
 			Entrypoint:  "/sbin/zinit init",
 			NetworkName: network.Name,
 			EnvVars: map[string]string{
