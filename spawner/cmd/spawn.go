@@ -14,7 +14,7 @@ var spawnCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		err = spawner.Spawner(ctx, cfg, tfPluginClient)
+		err = spawner.Spawn(ctx, cfg, tfPluginClient)
 		if err != nil {
 			log.Fatal().Err(err).Send()
 		}

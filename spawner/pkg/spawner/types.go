@@ -7,7 +7,6 @@ type Config struct {
 	GridEndpoints      Endpoints    `yaml:"grid_endpoints"`
 	Mnemonic           string       `yaml:"mnemonic"`
 	FailureStrategy    string       `yaml:"failure_strategy"`
-	MaxRetries         uint64       `yaml:"max_retries"`
 	SSHKey             string       `yaml:"ssh_key"`
 	Influx             InfluxConfig `yaml:"influx"`
 }

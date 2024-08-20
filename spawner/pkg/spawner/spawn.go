@@ -25,7 +25,7 @@ const (
 )
 
 // RunSpawner given a list of farm IDs, it spawns VMs on all nodes in these farms
-func Spawner(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
+func Spawn(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	deploymentStart := time.Now()
