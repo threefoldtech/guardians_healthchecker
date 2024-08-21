@@ -17,13 +17,12 @@ func setup(cfg spawner.Config) (deployer.TFPluginClient, error) {
 	mnemonic := cfg.Mnemonic
 
 	opts := []deployer.PluginOpt{
-		deployer.WithNetwork("dev"),
 		deployer.WithTwinCache(),
 		deployer.WithRMBTimeout(30),
 		deployer.WithProxyURL(cfg.GridEndpoints.Proxy),
 		deployer.WithRelayURL(cfg.GridEndpoints.Relay),
 		deployer.WithSubstrateURL(cfg.GridEndpoints.SubstrateURL),
-		// deployer.WithGraphQlURL(cfg.GridEndpoints.GraphQl),
+		deployer.WithGraphQlURL(cfg.GridEndpoints.GraphQl),
 	}
 
 	return deployer.NewTFPluginClient(mnemonic, opts...)

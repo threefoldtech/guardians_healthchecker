@@ -130,6 +130,7 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 			nil,
 			[]workloads.VM{vm},
 			nil,
+			nil,
 		)
 
 		networks = append(networks, &network)
