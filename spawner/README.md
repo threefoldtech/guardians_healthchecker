@@ -37,12 +37,12 @@ Create a new configuration file, for example `config.yaml`
 | `grid_endpoints.substrate_url` | Substrate URL                                | URL (e.g., `"wss://tfchain.dev.grid.tf/ws"`)         | Yes      |
 | `failure_strategy`     | Strategy for handling deployment failures            | `"retry"`, `"stop"`, `"destroy-all"`, `"destroy-failing"` | No       |
 | `mnemonic`             | Mnemonic for authentication                          | String                                               | Yes      |
-| `ssh_key`              | SSH key for accessing VMs                            | String                                               | Yes      |
-| `influx`               | InfluxDB configuration                               |                                                      |      |
-| `influx.url`           | InfluxDB URL                                         | URL (e.g., `"http://influxdb.example.com"`)          | Yes (if `influx` is provided) |
-| `influx.org`           | InfluxDB organization name                           | String                                               | Yes (if `influx` is provided) |
-| `influx.token`         | InfluxDB access token                                | String                                               | Yes (if `influx` is provided) |
-| `influx.bucket`        | InfluxDB bucket name                                 | String                                               | Yes (if `influx` is provided) |
+| `ssh_key`              | SSH key for accessing VMs                            | String                                               | No       |
+| `influx`               | InfluxDB configuration                               |                                                      |          |
+| `influx.url`           | InfluxDB URL                                         | URL (e.g., `"http://influxdb.example.com"`)          | Yes      |
+| `influx.org`           | InfluxDB organization name                           | String                                               | Yes      |
+| `influx.token`         | InfluxDB access token                                | String                                               | Yes      |
+| `influx.bucket`        | InfluxDB bucket name                                 | String                                               | Yes      |
 
 
 

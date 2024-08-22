@@ -47,7 +47,7 @@ func Spawn(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClie
 		}
 		vmCount := calculateVMCount(nodes, cfg.DeploymentStrategy)
 		if vmCount == 0 {
-			log.Fatal().Msg("there is nothing to deploy")
+			log.Info().Msg("there is nothing to deploy")
 			return nil
 		}
 		err = spawn(ctx, tfPluginClient, cfg, nodes, vmCount)
@@ -74,7 +74,7 @@ func getNodes(ctx context.Context, tfPluginClient deployer.TFPluginClient, farm 
 		FreeSRU: &freeSRU,
 		FarmIDs: []uint64{farm},
 	}
-	nodes, err := deployer.FilterNodes(ctx, tfPluginClient, filter, []uint64{freeSRU}, nil, nil)
+	nodes, err := deployer.FilterNodes(ctx, tfPluginClient, filter, nil, nil, []uint64{freeSRU})
 	if err != nil {
 		return nil, err
 	}
@@ -82,8 +82,40 @@ func getNodes(ctx context.Context, tfPluginClient deployer.TFPluginClient, farm 
 	return nodes, nil
 }
 
+// calculateVMCount calculates the number of VMs to deploy based on the deployment strategy
+func calculateVMCount(nodes []types.Node, strategy float64) int {
+	totalNodes := len(nodes)
+
+	return int(float64(totalNodes) * strategy)
+}
+
 // spawn creates and deploys VMs on the specified nodes according to the provided configuration
 func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Config, nodes []types.Node, vmCount int) error {
+	networks, vms, err := getDeployment(cfg, nodes, vmCount)
+	if err != nil {
+		return err
+	}
+
+	err = tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
+	if err != nil {
+		err = handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
+		if err != nil {
+			return err
+		}
+	}
+	err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)
+	if err != nil {
+		err = handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// getDeployment creates the deployment configuration for the specified nodes
+func getDeployment(cfg Config, nodes []types.Node, vmCount int) ([]*workloads.ZNet, []*workloads.Deployment, error) {
 	var networks []*workloads.ZNet
 	var vms []*workloads.Deployment
 
@@ -136,29 +168,8 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 		networks = append(networks, &network)
 		vms = append(vms, &dl)
 	}
-	err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
-	if err != nil {
-		err = handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
-		if err != nil {
-			return err
-		}
-	}
-	err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)
-	if err != nil {
-		err = handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
-		if err != nil {
-			return err
-		}
-	}
 
-	return nil
-}
-
-// calculateVMCount calculates the number of VMs to deploy based on the deployment strategy
-func calculateVMCount(nodes []types.Node, strategy float64) int {
-	totalNodes := len(nodes)
-
-	return int(float64(totalNodes) * strategy)
+	return networks, vms, nil
 }
 
 // handleFailure handles deployment failures according to the specified failure strategy
