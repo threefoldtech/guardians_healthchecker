@@ -35,7 +35,7 @@ Create a new configuration file, for example `config.yaml`
 | `grid_endpoints.proxy`   | Proxy endpoint URL                                 | URL (e.g., `"https://gridproxy.dev.grid.tf/"`)       | Yes      |
 | `grid_endpoints.relay`   | Relay endpoint URL                                 | URL (e.g., `"wss://relay.dev.grid.tf"`)              | Yes      |
 | `grid_endpoints.substrate_url` | Substrate URL                                | URL (e.g., `"wss://tfchain.dev.grid.tf/ws"`)         | Yes      |
-| `failure_strategy`     | Strategy for handling deployment failures            | `"retry"`, `"stop"`, `"destroy-all"`, `"destroy-failing"` | No       |
+| `failure_strategy`     | Strategy for handling deployment failures            | `"retry"`, `"stop"`, `"destroy-all"`, `"destroy-failing"` | Yes       |
 | `mnemonic`             | Mnemonic for authentication                          | String                                               | Yes      |
 | `ssh_key`              | SSH key for accessing VMs                            | String                                               | No       |
 | `influx`               | InfluxDB configuration                               |                                                      |          |

@@ -113,7 +113,7 @@ func processContract(
 
 // displayVMs prints the list of VMs in a tabular format.
 func displayVMs(vms []vmInfo) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.Debug)
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
 	fmt.Fprintln(w, "Farm\tNode\tName\tContract\tProjectName")
 	for _, vm := range vms {
 		fmt.Fprintf(w, "%d\t%d\t%s\t%d\t%s\n", vm.Farm, vm.Node, vm.Name, vm.Contract, vm.ProjectName)

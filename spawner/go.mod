@@ -5,6 +5,7 @@ go 1.22.4
 require (
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/rs/zerolog v1.33.0
+	github.com/sethvargo/go-retry v0.3.0
 	github.com/spf13/cobra v1.8.1
 	github.com/threefoldtech/tfgrid-sdk-go/grid-client v0.15.12-0.20240821101339-f26b395462d6
 	github.com/threefoldtech/tfgrid-sdk-go/grid-proxy v0.15.12-0.20240821101339-f26b395462d6
