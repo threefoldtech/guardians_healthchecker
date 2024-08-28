@@ -4,6 +4,7 @@ go 1.22.4
 
 require (
 	github.com/cosmos/go-bip39 v1.0.0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/rs/zerolog v1.33.0
 	github.com/sethvargo/go-retry v0.3.0
 	github.com/spf13/cobra v1.8.1
@@ -35,7 +36,6 @@ require (
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/holiman/uint256 v1.2.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6 // indirect

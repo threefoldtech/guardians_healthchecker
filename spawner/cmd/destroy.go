@@ -16,9 +16,8 @@ var destroyCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		err = spawner.Destroy(context.Background(), cfg, tfPluginClient)
-		if err != nil {
-			log.Fatal().Err(err).Send()
+		if errs := spawner.Destroy(context.Background(), cfg, tfPluginClient); errs != nil {
+			log.Error().Msg("failed to cancel deployments")
 		}
 
 		return nil

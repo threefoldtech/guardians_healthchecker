@@ -9,22 +9,33 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/rs/zerolog/log"
+	"github.com/sethvargo/go-retry"
 	"github.com/threefoldtech/tfgrid-sdk-go/grid-client/deployer"
 	"github.com/threefoldtech/tfgrid-sdk-go/grid-client/workloads"
 	"github.com/threefoldtech/tfgrid-sdk-go/grid-proxy/pkg/types"
 	"github.com/threefoldtech/zos/pkg/gridtypes"
 )
 
+// Represents the configuration for the deployment
 const (
-	defaultMaxRetries = 5
-	gb                = 1024 * 1024 * 1024
-	cpuCount          = 4
-	memorySize        = 8
-	rootSize          = 40
+	gb         = 1024 * 1024 * 1024
+	cpuCount   = 4
+	memorySize = 8
+	rootSize   = 40
 )
 
-// RunSpawner given a list of farm IDs, it spawns VMs on all nodes in these farms
+// Represents the deployment strategy
+const (
+	defaultMaxRetries = 5
+	retrying          = "retry"
+	destroyAll        = "destroy-all"
+	destroyFailing    = "destroy-failing"
+	stop              = "stop"
+)
+
+// Spawn given a list of farm IDs, it spawns VMs on all nodes in these farms
 func Spawn(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -47,7 +58,7 @@ func Spawn(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClie
 		}
 		vmCount := calculateVMCount(nodes, cfg.DeploymentStrategy)
 		if vmCount == 0 {
-			log.Info().Msg("there is nothing to deploy")
+			log.Warn().Msg("there is nothing to deploy")
 			return nil
 		}
 		err = spawn(ctx, tfPluginClient, cfg, nodes, vmCount)
@@ -96,19 +107,55 @@ func spawn(ctx context.Context, tfPluginClient deployer.TFPluginClient, cfg Conf
 		return err
 	}
 
-	err = tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
-	if err != nil {
-		err = handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
-		if err != nil {
-			return err
+	var resultErr *multierror.Error
+	retryCount := 1
+
+	err = retry.Do(ctx, retry.WithMaxRetries(defaultMaxRetries, retry.NewConstant(1*time.Second)), func(ctx context.Context) error {
+		if retryCount != 1 {
+			log.Info().Int("Retry", retryCount).Msg("Retrying deployment")
 		}
-	}
-	err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)
-	if err != nil {
-		err = handleFailure(ctx, err, cfg, tfPluginClient, networks, vms)
+
+		err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
 		if err != nil {
-			return err
+			log.Debug().Err(err).Msg("Network deployment failed")
+			resultErr = multierror.Append(resultErr, err)
 		}
+
+		err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)
+		if err != nil {
+			log.Debug().Err(err).Msg("VM deployment failed")
+			resultErr = multierror.Append(resultErr, err)
+		}
+
+		if resultErr == nil {
+			return nil
+		}
+
+		switch cfg.FailureStrategy {
+		case stop:
+			return resultErr
+
+		case destroyAll:
+			return Destroy(ctx, cfg, tfPluginClient)
+
+		case retrying:
+			vms, networks = identifyFailingResources(vms, networks)
+
+			retryCount++
+			return retry.RetryableError(resultErr.ErrorOrNil())
+
+		case destroyFailing:
+			_, failingNetworks := identifyFailingResources(vms, networks)
+
+			destroyFailingNetworks(ctx, tfPluginClient, failingNetworks)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Error().Err(resultErr.ErrorOrNil()).Msg("Deployment failed after retries")
+		return resultErr
 	}
 
 	return nil
@@ -170,78 +217,6 @@ func getDeployment(cfg Config, nodes []types.Node, vmCount int) ([]*workloads.ZN
 	}
 
 	return networks, vms, nil
-}
-
-// handleFailure handles deployment failures according to the specified failure strategy
-func handleFailure(ctx context.Context, err error, cfg Config, tfPluginClient deployer.TFPluginClient, networks []*workloads.ZNet, vms []*workloads.Deployment) error {
-	log.Error().Err(err).Msg("deployment failed")
-
-	switch cfg.FailureStrategy {
-	case "retry":
-		for i := 0; i < defaultMaxRetries; i++ {
-			log.Info().Msgf("retrying deployment... Attempt %d/%d\n", i+1, defaultMaxRetries)
-			err := deployResources(ctx, tfPluginClient, networks, vms)
-			if err == nil {
-				return nil
-			}
-			log.Error().Err(err).Msg("retry failed")
-		}
-		log.Error().Msg("all retry attempts failed.")
-		return err
-
-	case "destroy-all":
-		if destroyErr := destroyResources(ctx, tfPluginClient, networks, vms); destroyErr != nil {
-			log.Error().Err(destroyErr).Msg("failed to destroy resources")
-			return destroyErr
-		}
-		return err
-
-	case "destroy-failing":
-		failingVMs, failingNetworks := identifyFailingResources(vms, networks)
-		if destroyErr := destroyResources(ctx, tfPluginClient, failingNetworks, failingVMs); destroyErr != nil {
-			log.Error().Err(destroyErr).Msg("failed to destroy failing resources")
-			return destroyErr
-		}
-		return err
-
-	case "stop":
-		log.Info().Msg("stopping operation due to failure")
-		return err
-
-	default:
-		log.Error().Msg("unknown failure strategy")
-		return fmt.Errorf("unknown failure strategy: %s", cfg.FailureStrategy)
-	}
-}
-
-// deployResources deploys the specified networks and VMs
-func deployResources(ctx context.Context, tfPluginClient deployer.TFPluginClient, networks []*workloads.ZNet, vms []*workloads.Deployment) error {
-	err := tfPluginClient.NetworkDeployer.BatchDeploy(ctx, networks)
-	if err != nil {
-		return err
-	}
-	err = tfPluginClient.DeploymentDeployer.BatchDeploy(ctx, vms)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// destroyResources destroys the specified networks and VMs
-func destroyResources(ctx context.Context, tfPluginClient deployer.TFPluginClient, networks []*workloads.ZNet, vms []*workloads.Deployment) error {
-	err := tfPluginClient.NetworkDeployer.BatchCancel(ctx, networks)
-	if err != nil {
-		return err
-	}
-	for _, vm := range vms {
-		err := tfPluginClient.DeploymentDeployer.Cancel(ctx, vm)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // identifyFailingResources identifies the failing resources based on the error
