@@ -61,7 +61,7 @@ func Spawn(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClie
 		vmCount := calculateVMCount(nodes, cfg.DeploymentStrategy)
 		if vmCount == 0 {
 			log.Warn().Msg("there is nothing to deploy")
-			return nil
+			continue
 		}
 		err = spawn(ctx, tfPluginClient, cfg, nodes, vmCount)
 		if err != nil {
@@ -191,7 +191,6 @@ func getDeployment(cfg Config, nodes []types.Node, vmCount int) ([]*workloads.ZN
 				IP:   net.IPv4(10, 20, 0, 0),
 				Mask: net.CIDRMask(16, 32),
 			}),
-			AddWGAccess:  false,
 			SolutionType: name,
 		}
 		vm := workloads.VM{

@@ -18,16 +18,19 @@ import (
 // List lists running VMs on specified farms in the config file.
 func List(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClient) error {
 	var (
-		vms  []vmInfo
-		lock sync.Mutex
-		wg   sync.WaitGroup
+		vms []vmInfo
+		wg  sync.WaitGroup
+		mu  sync.Mutex
 	)
 
 	for _, farm := range cfg.Farms {
 		wg.Add(1)
 		go func(farm uint64) {
 			defer wg.Done()
-			processFarm(ctx, farm, &vms, &lock, tfPluginClient)
+			farmVMs := processFarm(ctx, farm, tfPluginClient)
+			mu.Lock()
+			vms = append(vms, farmVMs...)
+			mu.Unlock()
 		}(farm)
 	}
 
@@ -38,77 +41,89 @@ func List(ctx context.Context, cfg Config, tfPluginClient deployer.TFPluginClien
 	return nil
 }
 
-// processFarm processes all contracts for a given farm and appends VMs to the vms slice.
-func processFarm(ctx context.Context, farm uint64, vms *[]vmInfo, lock *sync.Mutex, tfPluginClient deployer.TFPluginClient) {
+// processFarm processes all contracts for a given farm and returns a slice of VMs.
+func processFarm(ctx context.Context, farm uint64, tfPluginClient deployer.TFPluginClient) []vmInfo {
 	name := fmt.Sprintf("vm/%d", farm)
 	contracts, err := tfPluginClient.ContractsGetter.ListContractsOfProjectName(name, true)
 	if err != nil {
 		fmt.Printf("error listing contracts for farm %d: %v\n", farm, err)
-		return
+		return nil
 	}
 	if len(contracts.NodeContracts) == 0 {
 		log.Warn().Msgf("no VMs found for farm %d with project name %s", farm, name)
-		return
+		return nil
 	}
 
-	var farmGroup errgroup.Group
+	var (
+		farmGroup errgroup.Group
+		vms       []vmInfo
+		mu        sync.Mutex
+	)
+
 	for _, contract := range contracts.NodeContracts {
 		contract := contract
 		farmGroup.Go(func() error {
-			return processContract(ctx, contract, farm, name, vms, lock, tfPluginClient)
+			vm, err := processContract(ctx, contract, farm, name, tfPluginClient)
+			if err != nil {
+				return err
+			}
+			if vm != nil {
+				mu.Lock()
+				vms = append(vms, *vm)
+				mu.Unlock()
+			}
+			return nil
 		})
 	}
 
 	if err := farmGroup.Wait(); err != nil {
 		fmt.Printf("Error processing contracts for farm %d: %v\n", farm, err)
 	}
+
+	return vms
 }
 
-// processContract processes a single contract and appends the VM info to the vms slice.
+// processContract processes a single contract and returns the VM info.
 func processContract(
 	ctx context.Context,
 	contract graphql.Contract,
 	farm uint64,
 	name string,
-	vms *[]vmInfo,
-	lock *sync.Mutex,
 	tfPluginClient deployer.TFPluginClient,
-) error {
+) (*vmInfo, error) {
 	contractID, err := strconv.ParseUint(contract.ContractID, 10, 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	nodeID := contract.NodeID
 	nodeClient, err := tfPluginClient.State.NcPool.GetNodeClient(tfPluginClient.State.Substrate, nodeID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dl, err := nodeClient.DeploymentGet(ctx, contractID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var metadata deploymentMetadata
 	err = json.Unmarshal([]byte(dl.Metadata), &metadata)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if metadata.Type == "vm" {
-		lock.Lock()
-		*vms = append(*vms, vmInfo{
+		return &vmInfo{
 			Farm:        farm,
 			Node:        nodeID,
 			Name:        metadata.Name,
 			Contract:    contractID,
 			ProjectName: name,
-		})
-		lock.Unlock()
+		}, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
 // displayVMs prints the list of VMs in a tabular format.
