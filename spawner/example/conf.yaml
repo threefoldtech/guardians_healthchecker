@@ -1,0 +1,19 @@
+farms:
+  - 1
+  - 2
+deployment_strategy: 1 #options: "0.7", "0.5", etc
+grid_endpoints:
+  graphql: "https://graphql.dev.grid.tf/graphql"
+  proxy: "https://gridproxy.dev.grid.tf/"
+  relay: "wss://relay.dev.grid.tf"
+  substrate_url: "wss://tfchain.dev.grid.tf/ws"
+failure_strategy: "retry"  # Other options: "stop", "destroy-all", "destroy-failing"
+
+mnemonic: ""
+ssh_key: ""
+
+influx:
+  url: ""
+  org: ""
+  token: ""
+  bucket: ""
